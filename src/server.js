@@ -33,10 +33,15 @@ if(method==='GET'){
 
 //POST route 
 if(method==='POST' && url==='/message'){
-   return getRequestBody(req,(body)=>{
-    sendResponse(200,`message rechived :${body}\n`)
+   return getRequestBody(req,(error,data)=>{
+    if(error){
+      return sendResponse(400,'invalid JSON body sent\n');
+    }
+
+   return sendResponse(200,`Message received : ${JSON.stringify(data)}\n`)
+
    });
-}
+  }
 else{
   return sendResponse(404,'Not found\n');
   }
@@ -54,6 +59,11 @@ function getRequestBody(req,callback){
     })
 
     req.on('end',()=>{
-    callback(body);
+    try{
+      const parsedData=body? JSON.parse(body) :{};
+      callback(null,parsedData);
+    }catch(error){
+      callback(error,null)
+    }
     })
 }
